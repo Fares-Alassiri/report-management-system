@@ -1,0 +1,79 @@
+{% extends 'core/main.html' %}
+
+{% block content %}
+
+<br>
+<br>
+<br>
+<br>
+
+<h1 style="transform: translateX(-50%); margin-left:50%">Reports</h1>
+<a href="create" ><button type="button" class="btn btn-light" style="width: 50%; transform: translateX(-50%); margin-left:50%">Create new report</button></a>
+
+<br>
+<br>
+
+<div class="input-group" style="width: 50%; transform: translateX(-50%); margin-left:50%">
+    <input type="text" class="form-control rounded" placeholder="Search by report name" aria-label="Search" id="search_name" onkeyup="searchName()"
+        aria-describedby="search-addon" />
+</div>
+
+<button type="button" class="btn btn-link show" style="width: 50%; transform: translateX(-50%); margin-left:50%; text-decoration: none" onclick="showAdvanceSearch()">Show Advance Search</button>
+<button type="button" class="btn btn-link hide" style="width: 50%; transform: translateX(-50%); margin-left:50%; text-decoration: none; display:none" onclick="hideAdvanceSearch()">Hide Advance Search</button>
+
+<div class="input-group advanceSearch" style="width: 50%; transform: translateX(-50%); margin-left:50%; display:none">
+    <input type="text" class="form-control rounded" placeholder="Search by report content" aria-label="Search" id="search_content" onkeyup="searchContent()"
+        aria-describedby="search-addon" />
+</div>
+
+<div class="input-group advanceSearch" style="width: 50%; transform: translateX(-50%); margin-left:50%; display: none;">
+    <input type="text" class="form-control rounded" placeholder="Search by report group" aria-label="Search" id="search_group" onkeyup="searchGroup()"
+        aria-describedby="search-addon" />
+</div>
+
+<div class="input-group advanceSearch" style="width: 50%; transform: translateX(-50%); margin-left:50%; display: none;">
+    <input type="text" class="form-control rounded" placeholder="Search by report tag" aria-label="Search" id="search_tag" onkeyup="searchTag()"
+        aria-describedby="search-addon" />
+</div>
+
+<div class="input-group advanceSearch" style="width: 50%; transform: translateX(-50%); margin-left:50%; display: none;">
+    <input type="text" class="form-control rounded" placeholder="Search by name of the report author" aria-label="Search" id="search_author" onkeyup="searchAuthor()"
+        aria-describedby="search-addon" />
+</div>
+
+<div class="input-group advanceSearch" style="width: 50%; transform: translateX(-50%); margin-left:50%; display: none;">
+    <input type="text" class="form-control rounded" placeholder="Search by name of the report editor" aria-label="Search" id="search_editor" onkeyup="searchEditor()"
+        aria-describedby="search-addon" />
+</div>
+
+<br>
+
+<ul id="reportsList">
+    {% for report in reports %}
+        <li>
+            <a href="{{report.id}}" style= "color: black; text-decoration: none">
+                <div class="card" style="width: 80%; transform: translateX(-50%); margin-left:50%; margin-bottom: 0%;">
+                    <div class="card-body">
+                        <h5 class="card-title name">{{report.name}}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted tag">Tags: {{ report.tags.all|join:', ' }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted group">Groups: {{ report.groups.all|join:', ' }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted author">Author: {{report.author}}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted editor">Editors: {{ report.editors.all|join:', ' }}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Created: {{report.created_at}}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Last Updated: {{report.created_at}}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted" style="display:inline">Content:</h6>
+                        <p class="card-text" style="display:inline">{{report.content|truncatechars:140}}</p>
+                        <p class="content" style="display:none">{{report.content}}</p>
+                    </div>
+                </div>
+            </a>
+        </li>
+    {% endfor %}
+
+</ul>
+
+<br>
+<br>
+<br>
+
+{% endblock %}

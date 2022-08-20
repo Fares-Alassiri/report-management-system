@@ -1,0 +1,45 @@
+{% extends 'core/main.html' %}
+
+{% block content %}
+
+<br>
+<br>
+<br>
+<br>
+
+<h1 style="transform: translateX(-50%); margin-left:50%">Report</h1>
+
+<a href="update"><button type="button" class="btn btn-light"
+        style="width: 50%; transform: translateX(-50%); margin-left:50%">Edit the report</button></a>
+
+<a href="delete"><button type="button" class="btn btn-light"
+        style="width: 50%; transform: translateX(-50%); margin-left:50%">Delete the report</button></a>
+
+<br>
+<br>
+
+<div class="card" style="width: 80%; transform: translateX(-50%); margin-left:50%">
+    <div class="card-body">
+        <h5 class="card-title name">{{report.name}}</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Attachments:</h6>
+        <ul class="attachments">
+            {% for attachment in report.attachment_set.all %}
+                <a href="{{attachment.file.url}}" style= "color: black; text-decoration: none"><li>{{attachment.file.name|slice:"29:"}}</li></a>
+            {% endfor %}
+        </ul>
+        <h6 class="card-subtitle mb-2 text-muted">Tags: {{ report.tags.all|join:', ' }}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Groups: {{ report.groups.all|join:', ' }}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Author: {{report.author}}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Editors: {{ report.editors.all|join:', ' }}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Created: {{report.created_at}}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Last Updated: {{report.created_at}}</h6>
+        <p class="card-text content">{{report.content}}</p>
+    </div>
+</div>
+
+<br>
+<br>
+<br>
+<br>
+
+{% endblock %}

@@ -1,0 +1,18 @@
+#logo {
+    text-transform: capitalize;
+    text-shadow: 2px 2px 5px darkgray;
+    font-size: 175%;
+}
+
+body {
+    background-color: rgb(232, 232, 232);
+    display: block
+}
+
+ul {
+    list-style-type: none;
+}
+
+ul.attachments {
+    list-style-type: cycle;
+}
