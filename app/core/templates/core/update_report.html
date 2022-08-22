@@ -12,11 +12,16 @@
             {{error}}
         </div>
     {% endif %}
+    {% for message in messages %}
+        <div class="alert alert-success" role="alert">
+            {{message}}
+        </div>
+    {% endfor %}
     <form method="post" enctype="multipart/form-data" action="">
         {% csrf_token %}
         <div class="form-group"></div>
             <br>
-            <label for="Name">Name:</label>
+            <label for="Name">Name*:</label>
             <input class="form-control form-control-lg" type="text" value="{{report.name}}" id="Name" name="Name" placeholder="Report Name">
             <hr>
             <label for="Attachment">Attachments:</label>
@@ -37,7 +42,7 @@
             <label for="Tags">Tags (to split between tags use a comma without space):</label>
             <textarea class="form-control" id="Tags" name="Tags" rows="2">{{ report.tags.all|join:',' }}</textarea>
             <hr>
-            <label for="Groups">Groups:</label>
+            <label for="Groups">Groups*:</label>
             {% for group in groups %}
                 {% if group in rgroups %}
                 <div class="form-check form-check">

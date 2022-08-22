@@ -1,0 +1,66 @@
+{% extends 'core/main.html' %}
+
+{% block content %}
+
+<br>
+<br>
+<br>
+
+<div style="margin-left: 50%; width:70%; transform: translateX(-50%)">
+    {% for message in messages %}
+        <div class="" style="color: blue;" role="alert">
+            {{message}}
+        </div>
+    {% endfor %}
+    <form method="post" enctype="multipart/form-data" action="{% url 'editemail' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <br>
+            <p><label>To change email</label></p>
+            <label for="email">Email:</label>
+            <div class="form-outline mb-4">
+                {{emailform.email}}
+            </div>
+            <input type="submit" value="Edit email">
+            <hr>
+            {{emailform.errors}}
+        </div>
+    </form>
+    <form method="post" enctype="multipart/form-data" action="{% url 'editpass' %}">
+        {% csrf_token %}
+        <div class="form-group">
+            <p><label>To change password</label></p>
+            <label for="oldpass">Old Password:</label>
+            {{passform.old_password}}
+            <label for="password1">New Password:</label>
+            {{passform.new_password1}}
+            <label for="password2">New Password Confirmation:</label>
+            {{passform.new_password2}}
+            <input type="submit" value="Edit password">
+            <p>{{passform.errors}}</p>
+        </div>
+    </form>
+</div>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<script>
+    var formFields = document.getElementsByTagName('input')
+    formFields[1].classList.add('form-control');
+    formFields[1].classList.add('form-control-lg');
+
+    formFields[4].classList.add('form-control');
+    formFields[4].classList.add('form-control-lg');
+
+    formFields[5].classList.add('form-control');
+    formFields[5].classList.add('form-control-lg');
+
+    formFields[6].classList.add('form-control');
+    formFields[6].classList.add('form-control-lg');
+</script>
+
+{% endblock %}

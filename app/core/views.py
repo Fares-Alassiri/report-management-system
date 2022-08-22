@@ -1,30 +1,50 @@
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
+from django.contrib.auth.forms import PasswordChangeForm
 
+from django.contrib import messages
+
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+
+from django.contrib.auth.models import Group as UserGroup
 from core.models import *
-# from core.forms import ReportForm
+from core.forms import CreateUserForm, EditProfileEmail
 
 # Create your views here.
 
+@login_required(login_url='signin')
 def home(request):
     return render(request, 'core/dashboard.html')
 
+@login_required(login_url='signin')
 def reports(request):
-    # TODO: filter reports by groups of user
-    reports = Report.objects.all()
+    profile = Profile.objects.get(user=request.user)
+    user_groups = Group.objects.filter(profiles=profile)
+    reports = Report.objects.filter(groups__in=user_groups).order_by('-created_at')
     context = {
         'reports': reports,
     }
     return render(request, 'core/reports.html', context)
 
+@login_required(login_url='signin')
 def report(request, pk):
-    report = Report.objects.get(id=pk)
+    report = get_object_or_404(Report, id=pk)
+    report_groups = Group.objects.filter(report=report).all()
+    flag = False
+    for group in report_groups:
+        obj = Profile.objects.filter(profiles=group).all()
+        if Profile.objects.get(user=request.user) in obj:
+            flag = True
+    if flag == False:
+        messages.success(request, 'You have not permission to view the report!')
+        return redirect('reports')
     context = {
         'report': report,
     }
     return render(request, 'core/report.html', context)
 
+@login_required(login_url='signin')
 def create_report(request):
     if request.method == 'POST':
         try:
@@ -55,23 +75,23 @@ def create_report(request):
                         report = report
                     )
         except:
-            groups = Group.objects.filter(profiles=Profile.objects.get(user=1))
+            groups = Group.objects.filter(profiles=Profile.objects.get(user=request.user))
             context = { 
                 'groups': groups,
                 'error': 'Please make sure that you entered valid inputs and try again'
             }
 
             return render(request, 'core/create_report.html', context)
-        # Attachment.objects.create(file=request.FILES.get('Files'))
+        messages.success(request, 'Report created successfully')
         return redirect('/report')
-    # TODO: filter reports by groups of user
-    groups = Group.objects.filter(profiles=Profile.objects.get(user=1))
+    groups = Group.objects.filter(profiles=Profile.objects.get(user=request.user))
     context = { 
         'groups': groups,
     }
 
     return render(request, 'core/create_report.html', context)
 
+@login_required(login_url='signin')
 def update_report(request, pk):
     if request.method == 'POST':
         try:
@@ -108,9 +128,17 @@ def update_report(request, pk):
                     )
         except Exception as e:
             print(e)
-            report = Report.objects.get(id=pk)
-            # TODO: filter reports by groups of user
-            groups = Group.objects.filter(profiles=Profile.objects.get(user=1))
+            report = get_object_or_404(Report, id=pk)
+            report_groups = Group.objects.filter(report=report).all()
+            flag = False
+            for group in report_groups:
+                obj = Profile.objects.filter(profiles=group).all()
+                if Profile.objects.get(user=request.user) in obj:
+                    flag = True
+            if flag == False:
+                messages.success(request, 'You have not permission to edit the report!')
+                return redirect('reports')
+            groups = Group.objects.filter(profiles=Profile.objects.get(user=request.user))
             rgroups = report.groups.all()
             temp3 = []
             for element in rgroups:
@@ -127,10 +155,19 @@ def update_report(request, pk):
 
             return render(request, 'core/update_report.html', context)
         # Attachment.objects.create(file=request.FILES.get('Files'))
+        messages.success(request, 'The report has been updated successfully')
         return redirect('/report/{}'.format(pk))
-    report = Report.objects.get(id=pk)
-    # TODO: filter reports by groups of user
-    groups = Group.objects.filter(profiles=Profile.objects.get(user=1))
+    report = get_object_or_404(Report, id=pk)
+    report_groups = Group.objects.filter(report=report).all()
+    flag = False
+    for group in report_groups:
+        obj = Profile.objects.filter(profiles=group).all()
+        if Profile.objects.get(user=request.user) in obj:
+            flag = True
+    if flag == False:
+        messages.success(request, 'You have not permission to edit the report!')
+        return redirect('reports')
+    groups = Group.objects.filter(profiles=Profile.objects.get(user=request.user))
     rgroups = report.groups.all()
     temp3 = []
     for element in rgroups:
@@ -146,10 +183,115 @@ def update_report(request, pk):
 
     return render(request, 'core/update_report.html', context)
 
+@login_required(login_url='signin')
 def delete_report(request, pk):
-    report = Report.objects.get(id=pk).delete()
+    report = get_object_or_404(Report, id=pk)
+    report_groups = Group.objects.filter(report=report).all()
+    flag = False
+    for group in report_groups:
+        obj = Profile.objects.filter(profiles=group).all()
+        if Profile.objects.get(user=request.user) in obj:
+            flag = True
+    if flag == False:
+        messages.success(request, 'You have not permission to delete the report!')
+        return redirect('reports')
+    report.delete()
+    messages.success(request, 'Report deleted successfully')
     return redirect('/report')
 
+@login_required(login_url='signin')
 def delete_attachment(request, rid, aid):
-    attachment = Attachment.objects.get(id=aid).delete()
+    attachment = get_object_or_404(Attachment, id=aid)
+    report = get_object_or_404(Report, id=rid)
+    report_groups = Group.objects.filter(report=report).all()
+    flag = False
+    for group in report_groups:
+        obj = Profile.objects.filter(profiles=group).all()
+        if Profile.objects.get(user=request.user) in obj:
+            flag = True
+    if flag == False:
+        messages.success(request, 'You have not permission to edit the report!')
+        return redirect('reports')
+    attachment.delete()
+    messages.success(request, 'Attachment deleted successfully')
     return redirect('/report/{}/update'.format(rid))
+
+def signin(request):
+    if request.user.is_authenticated:
+        return redirect('reports')
+    else:
+        if request.method == 'POST':
+            username = request.POST.get('username')
+            password = request.POST.get('password')
+            
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('reports')
+            else:
+                context = {'error': 'Invalid username or password'}
+                return render(request, 'core/login.html', context= context)
+
+        context = {}
+        return render(request, 'core/login.html', context= context)
+
+@login_required(login_url='signin')
+def signout(request):
+    logout(request)
+    return redirect('signin')
+
+def signup(request):
+    if request.user.is_authenticated:
+        return redirect('reports')
+    else:
+        form = CreateUserForm()
+
+        if request.method == 'POST':
+            try:
+                with transaction.atomic():
+                    form = CreateUserForm(request.POST)
+                    if form.is_valid():
+                        form.save()
+                        user = form.cleaned_data.get('username')
+                        Profile.objects.create(user= User.objects.get(username=user))
+                        user_group = UserGroup.objects.get(name='User') 
+                        user_group.user_set.add(User.objects.get(username=user))
+                        messages.success(request, 'Account was created successfully for '+user)
+                        return redirect('signin')
+            except:
+                context = {'form': form, 'error': 'Please make sure that you entered valid inputs and try again'}
+                return render(request, 'core/signup.html', context= context)
+            
+
+        context = {'form': form}
+        return render(request, 'core/signup.html', context= context)
+
+def account(request):
+    emailform = EditProfileEmail(instance= request.user)
+    passform = PasswordChangeForm(user= request.user)
+    context = {'passform': passform, 'emailform':emailform,}
+    return render(request, 'core/account.html', context)
+
+def editemail(request):
+    if request.method == 'POST':
+        form = EditProfileEmail(request.POST, instance= request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'The email was successfully updated')
+            return redirect('account')
+        messages.success(request, 'The email was not updated, try again')
+        return redirect('account')
+
+def editpass(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'The password was successfully updated')
+            return redirect('signin')
+        messages.error(request, 'The password was not updated, try again and make sure you entered correct old password and re write new one correct')
+        return redirect('account')
+    
+def accounts_login(request):
+    return redirect('signin')

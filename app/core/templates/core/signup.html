@@ -1,0 +1,66 @@
+{% load static %}
+
+<!DOCTYPE html>
+    <html lang="en">
+        <head>
+        <meta charset='utf-8'>
+        <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+        <title>RMS</title>
+        <meta name='viewport' content='width=device-width, initial-scale=1'>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <script type="text/javascript">
+            
+        </script>
+    </head>
+    <body>
+        <div style="margin-top:10%; width: 50%; transform: translateX(-50%); margin-left:50%">
+            {% if error %}
+                <div class="alert alert-danger" role="alert">
+                    {{error}}
+                </div>
+            {% endif %}
+            <form method="post" action="{% url 'signup' %}">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form2Example1">Username</label>
+                    {{form.username}}
+                </div>
+
+                <!-- Email -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form2Example1">Email</label>
+                    {{form.email}}
+                </div>
+    
+                <!-- Password input -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form2Example2">Password</label>
+                    {{form.password1}}
+                </div>
+
+                <!-- Password confirmation input -->
+                <div class="form-outline mb-4">
+                    <label class="form-label" for="form2Example2">Re-enter Password</label>
+                    {{form.password2}}
+                </div>
+
+                <input type="submit" value="Create User">
+    
+                <!-- Register buttons -->
+                <div class="text-center">
+                    <p>Already have an account? <a href="{% url 'signin' %}">Sign in</a></p>
+                </div>
+            </form>
+            {{form.errors}}
+        </div>
+        <script>
+            var formFields = document.getElementsByTagName('input')
+            formFields[1].classList.add('form-control');
+            formFields[2].classList.add('form-control');
+            formFields[3].classList.add('form-control');
+            formFields[4].classList.add('form-control');
+        </script>
+    </body>
+</html>
