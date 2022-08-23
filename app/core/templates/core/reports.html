@@ -66,7 +66,7 @@
                         <h6 class="card-subtitle mb-2 text-muted author">Author: {{report.author}}</h6>
                         <h6 class="card-subtitle mb-2 text-muted editor">Editors: {{ report.editors.all|join:', ' }}</h6>
                         <h6 class="card-subtitle mb-2 text-muted">Created: {{report.created_at}}</h6>
-                        <h6 class="card-subtitle mb-2 text-muted">Last Updated: {{report.created_at}}</h6>
+                        <h6 class="card-subtitle mb-2 text-muted">Last Updated: {{report.edited_at}}</h6>
                         <h6 class="card-subtitle mb-2 text-muted" style="display:inline">Content:</h6>
                         <p class="card-text" style="display:inline">{{report.content|truncatechars:140}}</p>
                         <p class="content" style="display:none">{{report.content}}</p>

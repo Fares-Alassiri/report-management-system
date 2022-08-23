@@ -37,7 +37,7 @@
         <h6 class="card-subtitle mb-2 text-muted">Author: {{report.author}}</h6>
         <h6 class="card-subtitle mb-2 text-muted">Editors: {{ report.editors.all|join:', ' }}</h6>
         <h6 class="card-subtitle mb-2 text-muted">Created: {{report.created_at}}</h6>
-        <h6 class="card-subtitle mb-2 text-muted">Last Updated: {{report.created_at}}</h6>
+        <h6 class="card-subtitle mb-2 text-muted">Last Updated: {{report.edited_at}}</h6>
         <p class="card-text content">{{report.content}}</p>
     </div>
 </div>

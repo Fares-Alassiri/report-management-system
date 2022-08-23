@@ -1,6 +1,7 @@
 import os
 # import pandas as pd
 import openpyxl
+import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
@@ -21,7 +22,7 @@ from app import settings
 
 @login_required(login_url='signin')
 def home(request):
-    return render(request, 'core/dashboard.html')
+    return redirect('reports')
 
 @login_required(login_url='signin')
 def reports(request):
@@ -132,6 +133,7 @@ def update_report(request, pk):
                         report = report
                     )
         except Exception as e:
+            print(e)
             report = get_object_or_404(Report, id=pk)
             report_groups = Group.objects.filter(report=report).all()
             flag = False
