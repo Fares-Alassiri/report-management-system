@@ -35,6 +35,7 @@ class Report(models.Model):
     content = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     edited_at = models.DateTimeField(auto_now=True, null=True)
+    attachment_ref = models.CharField(max_length=255, null=True, blank=True)
 
     def __str__(self):
         return self.name

@@ -1,0 +1,38 @@
+{% extends 'core/main.html' %}
+
+{% block content %}
+
+<br>
+<br>
+<br>
+
+<div style="margin-left: 50%; width:70%; transform: translateX(-50%)">
+    {% if error %}
+        <div class="alert alert-danger" role="alert">
+            {{error}}
+        </div>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" action="">
+        {% csrf_token %}
+        <div class="form-group"></div>
+            <br>
+            <label for="excel">Excel file contains reports information as(attachments_id of report _ attachment name)Like picture:<br>(Mandatory columns are ReportName and ReportGroups)<br>(Row 1 must be same as picture)</label><br>
+            <img src="/media/excel.png" style="width:50%"  alt="">
+            <input type="file" class="form-control-file" id="excel" name="excel">
+            <hr>
+            <label for="zip">Upload files like picture below reference attachment to report by adding {Attachments_id from excel file}_ at the begining of the file name:</label>
+            <img src="/media/zip.png" style="width:50%" alt="">
+            <input type="file" class="form-control-file" id="zip" name="zip" multiple>
+            <hr>
+            <input type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+{% endblock %}

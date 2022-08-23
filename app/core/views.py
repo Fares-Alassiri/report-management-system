@@ -1,3 +1,7 @@
+import os
+# import pandas as pd
+import openpyxl
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.contrib.auth.forms import PasswordChangeForm
@@ -10,6 +14,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group as UserGroup
 from core.models import *
 from core.forms import CreateUserForm, EditProfileEmail
+
+from app import settings
 
 # Create your views here.
 
@@ -52,7 +58,7 @@ def create_report(request):
             with transaction.atomic():
                 report = Report.objects.create(
                     name = request.POST.get('Name'),
-                    author = Profile.objects.get(user=1),
+                    author = Profile.objects.get(user=request.user),
                     content = request.POST.get('Content'),
                 )
 
@@ -66,7 +72,7 @@ def create_report(request):
                     group = Group.objects.get(id=int(g))
                     report.groups.add(group)
 
-                report.editors.add(Profile.objects.get(user=1))
+                report.editors.add(Profile.objects.get(user=request.user))
 
                 files = request.FILES.getlist('Files')
                 for file in files:
@@ -127,7 +133,6 @@ def update_report(request, pk):
                         report = report
                     )
         except Exception as e:
-            print(e)
             report = get_object_or_404(Report, id=pk)
             report_groups = Group.objects.filter(report=report).all()
             flag = False
@@ -295,3 +300,79 @@ def editpass(request):
     
 def accounts_login(request):
     return redirect('signin')
+
+@login_required
+def reports_new(request):
+    ugroup = None
+    if request.user.groups.exists():
+        ugroup = request.user.groups.all()[0].name
+    if ugroup != 'Admin':
+        messages.success(request, 'You have not permission to go to previous page')
+        return redirect('reports')
+    if request.method == 'POST':
+        try:
+            with transaction.atomic():
+                file1 = request.FILES.getlist('zip')
+                file2 = request.FILES.get('excel')
+                if not file2:
+                    return render(request, 'core/new_reports.html', {'error': 'Please upload at least the excel file'})
+                if not (allowed_excel_file(str(file2))):
+                    return render(request, 'core/new_reports.html', {'error': 'Please upload first file with correct extensions .xlsx'})
+                xlsx = openpyxl.load_workbook(file2)
+                sheet = xlsx.active
+                idxs = []
+                for row in sheet.iter_rows():
+                    for cell in row:
+                        idxs.append(cell.value)
+                    break
+
+                if idxs[0] != 'ReportName' or idxs[1] != 'ReportContent' or idxs[2] != 'ReportTags' or idxs[3] != 'ReportGroups' or idxs[4] != 'Attachments_id':
+                    return render(request, 'core/new_reports.html', {'error': 'Please upload first file with first row same as picture'})
+                i = 0
+                for row in sheet.iter_rows():
+                    if i == 0:
+                        i += 1
+                        continue
+                    vals = []
+                    for cell in row:
+                        vals.append(cell.value)
+                    report = Report.objects.create(
+                        name = vals[0],
+                        author = Profile.objects.get(user=request.user),
+                        content = vals[1],
+                        attachment_ref = vals[4]
+                    )
+
+                    tags = str(vals[2]).split(',')
+                    for t in tags:
+                        tag, created_tag = Tag.objects.get_or_create(name=t)
+                        report.tags.add(tag)
+                    
+                    groups = str(vals[3]).split(',')
+                    for g in groups:
+                        group, group_tag = Group.objects.get_or_create(name=g)
+                        report.groups.add(group)
+
+                    report.editors.add(Profile.objects.get(user=request.user))
+                
+                if file1:
+                    for file in file1:
+                        report_attachment_id = str(file).split('.')[0].split('_')[0]
+                        report = Report.objects.filter(attachment_ref=report_attachment_id).order_by('-created_at').first()
+                        Attachment.objects.create(
+                            file = file,
+                            report = report
+                        )
+                messages.success(request, 'The new reports were created successfully')
+                return redirect('reports')
+        except Exception as e:
+            return render(request, 'core/new_reports.html', {'error':'There is error, try again and make sure you follow the instructions'})    
+    return render(request, 'core/new_reports.html', {})
+
+def allowed_zip_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'zip'}
+
+def allowed_excel_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in {'xlsx'}

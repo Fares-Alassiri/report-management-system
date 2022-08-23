@@ -19,9 +19,10 @@ urlpatterns = [
     path('reset_password_complete/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete'),
 
     path('report/', views.reports, name="reports"),
+    path('reports/new/', views.reports_new, name="reports_new"),
     path('report/<str:pk>/', views.report),
     path('report/<str:pk>/update', views.update_report),
     path('report/<str:pk>/delete', views.delete_report),
-    path('report/create', views.create_report),
+    path('create/', views.create_report, name="create"),
     path('report/<str:rid>/delete_attatchment/<str:aid>', views.delete_attachment),
 ]
