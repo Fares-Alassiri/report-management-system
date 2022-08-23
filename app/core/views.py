@@ -121,8 +121,7 @@ def update_report(request, pk):
                     group = Group.objects.get(id=int(g))
                     report.groups.add(group)
 
-                report.editors.add(Profile.objects.get(user=1))
-                report.editors.add(Profile.objects.get(user=1))
+                report.editors.add(Profile.objects.get(user=request.user))
 
                 report.save()
 
